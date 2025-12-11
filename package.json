@@ -1,0 +1,43 @@
+{
+  "name": "quartz-lang",
+  "displayName": "Quartz",
+  "description": "Syntax highlighting and editor support for the Quartz programming language",
+  "version": "0.1.0",
+  "publisher": "basaltmc",
+  "license": "MIT",
+  "homepage": "https://quartzlang.org",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "quartz",
+    "qz",
+    "basalt"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "quartz",
+        "aliases": [
+          "Quartz",
+          "quartz"
+        ],
+        "extensions": [
+          ".qz",
+          ".qzi"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "quartz",
+        "scopeName": "source.quartz",
+        "path": "./syntaxes/quartz.tmLanguage.json"
+      }
+    ]
+  }
+}
