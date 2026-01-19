@@ -1,13 +1,13 @@
 {
   "name": "quartz-lang",
   "displayName": "Quartz",
-  "description": "Syntax highlighting and editor support for the Quartz programming language",
+  "description": "Syntax highlighting and language server support for the Quartz programming language",
   "version": "0.1.0",
   "publisher": "basaltmc",
   "license": "MIT",
   "homepage": "https://quartzlang.org",
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.82.0"
   },
   "categories": [
     "Programming Languages"
@@ -16,6 +16,10 @@
     "quartz",
     "qz",
     "basalt"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:quartz"
   ],
   "contributes": {
     "languages": [
@@ -38,6 +42,30 @@
         "scopeName": "source.quartz",
         "path": "./syntaxes/quartz.tmLanguage.json"
       }
-    ]
+    ],
+    "commands": [
+      {
+        "command": "quartz.restartServer",
+        "title": "Quartz: Restart Language Server"
+      }
+    ],
+    "configuration": {
+      "title": "Quartz",
+      "properties": {
+        "quartz.server.path": {
+          "type": "string",
+          "default": "quartz-lsp",
+          "description": "Path to the quartz-lsp executable. A bare name is looked up on PATH."
+        },
+        "quartz.server.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Start the language server for diagnostics, hover, go to definition, symbols, completion and formatting."
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
   }
 }
