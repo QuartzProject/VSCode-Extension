@@ -317,6 +317,10 @@
           "match": "\\b(as|is)\\b"
         },
         {
+          "name": "keyword.operator.with.quartz",
+          "match": "\\bwith\\b(?=\\s*\\{)"
+        },
+        {
           "name": "constant.language.boolean.quartz",
           "match": "\\b(true|false)\\b"
         },
