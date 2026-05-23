@@ -40,7 +40,44 @@ async function restart() {
     await start();
 }
 
+// The debugger is the CLI itself: `quartz debug --dap` speaks the Debug Adapter Protocol on stdin and stdout.
+class QuartzDebugAdapterFactory {
+    createDebugAdapterDescriptor() {
+        const command = vscode.workspace.getConfiguration('quartz').get('cli.path') || 'quartz';
+        return new vscode.DebugAdapterExecutable(command, ['debug', '--dap']);
+    }
+}
+
+class QuartzDebugConfigurationProvider {
+    provideDebugConfigurations() {
+        return [
+            { type: 'quartz', request: 'launch', name: 'Run current file', program: '${file}' },
+            { type: 'quartz', request: 'launch', name: 'Run tests', program: '${workspaceFolder}', tests: true },
+        ];
+    }
+
+    resolveDebugConfiguration(folder, config) {
+        if (!config.type && !config.request && !config.name) {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor || editor.document.languageId !== 'quartz') {
+                return config;
+            }
+            return { type: 'quartz', request: 'launch', name: 'Run current file', program: '${file}' };
+        }
+        return config;
+    }
+}
+
 function activate(context) {
+    context.subscriptions.push(
+        vscode.debug.registerDebugAdapterDescriptorFactory('quartz', new QuartzDebugAdapterFactory()),
+        vscode.debug.registerDebugConfigurationProvider('quartz', new QuartzDebugConfigurationProvider()),
+        vscode.debug.registerDebugConfigurationProvider(
+            'quartz',
+            new QuartzDebugConfigurationProvider(),
+            vscode.DebugConfigurationProviderTriggerKind.Dynamic,
+        ),
+    );
     context.subscriptions.push(vscode.commands.registerCommand('quartz.restartServer', restart));
     context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration((e) => {
