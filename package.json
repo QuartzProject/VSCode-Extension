@@ -3,9 +3,13 @@
   "displayName": "Quartz",
   "description": "Syntax highlighting, language server and debugger support for the Quartz programming language",
   "version": "0.1.0",
-  "publisher": "basaltmc",
+  "publisher": "quartzlang",
   "license": "MIT",
   "homepage": "https://quartzlang.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/QuartzProject/VSCode-Extension.git"
+  },
   "engines": {
     "vscode": "^1.82.0"
   },
@@ -16,7 +20,7 @@
   "keywords": [
     "quartz",
     "qz",
-    "basalt"
+    "qzi"
   ],
   "main": "./extension.js",
   "activationEvents": [
@@ -24,6 +28,9 @@
     "onDebugResolve:quartz",
     "onDebugDynamicConfigurations:quartz"
   ],
+  "scripts": {
+    "sync-grammar": "node scripts/sync-grammar.mjs"
+  },
   "contributes": {
     "languages": [
       {
