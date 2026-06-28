@@ -1,0 +1,164 @@
+{
+  "name": "quartz-lang",
+  "displayName": "Quartz",
+  "description": "Syntax highlighting, language server and debugger support for the Quartz programming language",
+  "version": "0.1.0",
+  "publisher": "basaltmc",
+  "license": "MIT",
+  "homepage": "https://quartzlang.org",
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Debuggers"
+  ],
+  "keywords": [
+    "quartz",
+    "qz",
+    "basalt"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:quartz",
+    "onDebugResolve:quartz",
+    "onDebugDynamicConfigurations:quartz"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "quartz",
+        "aliases": [
+          "Quartz",
+          "quartz"
+        ],
+        "extensions": [
+          ".qz",
+          ".qzi"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "quartz",
+        "scopeName": "source.quartz",
+        "path": "./syntaxes/quartz.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "quartz.restartServer",
+        "title": "Quartz: Restart Language Server"
+      }
+    ],
+    "configuration": {
+      "title": "Quartz",
+      "properties": {
+        "quartz.server.path": {
+          "type": "string",
+          "default": "quartz-lsp",
+          "description": "Path to the quartz-lsp executable. A bare name is looked up on PATH."
+        },
+        "quartz.server.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Start the language server for diagnostics, hover, go to definition, symbols, completion and formatting."
+        },
+        "quartz.cli.path": {
+          "type": "string",
+          "default": "quartz",
+          "description": "Path to the quartz executable, used to debug (`quartz debug --dap`). A bare name is looked up on PATH."
+        }
+      }
+    },
+    "breakpoints": [
+      {
+        "language": "quartz"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "quartz",
+        "label": "Quartz",
+        "languages": [
+          "quartz"
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "A .qz file, a package folder or a .qzb module.",
+                "default": "${file}"
+              },
+              "entry": {
+                "type": "string",
+                "description": "The function to run.",
+                "default": "main"
+              },
+              "tests": {
+                "type": "boolean",
+                "description": "Run the @test functions instead of the entry function.",
+                "default": false
+              },
+              "filter": {
+                "type": "string",
+                "description": "With tests: run only the tests whose name contains this text."
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "description": "Stop at the first line that runs.",
+                "default": false
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "quartz",
+            "request": "launch",
+            "name": "Run current file",
+            "program": "${file}"
+          },
+          {
+            "type": "quartz",
+            "request": "launch",
+            "name": "Run tests",
+            "program": "${workspaceFolder}",
+            "tests": true
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Quartz: Run current file",
+            "description": "Debug the file in the editor",
+            "body": {
+              "type": "quartz",
+              "request": "launch",
+              "name": "Run current file",
+              "program": "^\"\\${file}\""
+            }
+          },
+          {
+            "label": "Quartz: Run tests",
+            "description": "Debug the @test functions of the folder",
+            "body": {
+              "type": "quartz",
+              "request": "launch",
+              "name": "Run tests",
+              "program": "^\"\\${workspaceFolder}\"",
+              "tests": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
+}
