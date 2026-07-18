@@ -1,0 +1,5 @@
+.github/**
+.gitignore
+scripts/**
+dist/**
+*.vsix
