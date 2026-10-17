@@ -101,6 +101,24 @@
     "strings": {
       "patterns": [
         {
+          "name": "string.quoted.raw.quartz",
+          "begin": "\\b(r)(#*)\"",
+          "end": "\"\\2",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.quartz"
+            },
+            "1": {
+              "name": "storage.type.string.quartz"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.quartz"
+            }
+          }
+        },
+        {
           "name": "string.quoted.triple.quartz",
           "begin": "\"\"\"",
           "end": "\"\"\"",
