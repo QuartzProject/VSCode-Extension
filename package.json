@@ -120,6 +120,14 @@
                 "type": "boolean",
                 "description": "Stop at the first line that runs.",
                 "default": false
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "More `suspend fn`s to start as tasks next to the entry; each one is a thread in the call stack.",
+                "default": []
               }
             }
           }
