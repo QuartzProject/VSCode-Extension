@@ -8,7 +8,7 @@ sha="${2:?sha}"
 artifacts="${3:?artifact dir}"
 out="$(mktemp -d)"
 
-find "$artifacts" -type f -exec cp {} "$out"/ ;
+find "$artifacts" -type f -exec cp {} "$out"/ \;
 (cd "$out" && sha256sum -- * >SHA256SUMS)
 
 gh release create "v$version" "$out"/* --target "$sha" --title "$version" --generate-notes --latest
