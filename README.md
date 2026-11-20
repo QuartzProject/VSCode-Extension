@@ -23,10 +23,15 @@
 - **Debugger** (`quartz debug --dap`): breakpoints, stepping, the call stack, variables and stopping on traps. Press
   F5 on a Quartz file.
 
-## Requirements
+## Install
 
-`quartz` and `quartz-lsp` on your `PATH`, or their paths in the `quartz.cli.path` and `quartz.server.path` settings.
-Highlighting works without them.
+Every commit to `main` publishes a release, numbered `0.<n>` until 1.0, on the
+[releases page](https://github.com/QuartzProject/VSCode-Extension/releases). Download the `.vsix` and pick
+**Extensions: Install from VSIX...** in the command palette.
+
+The language server and the debugger need `quartz` and `quartz-lsp` from a
+[Quartz release](https://github.com/QuartzProject/Quartz/releases) on your `PATH`, or their paths in the
+`quartz.cli.path` and `quartz.server.path` settings. Highlighting works without them.
 
 ## Building
 
@@ -35,8 +40,8 @@ npm install
 npx @vscode/vsce package
 ```
 
-The grammar comes from [Grammars](https://github.com/QuartzProject/Grammars): change it there and copy it with
-`npm run sync-grammar -- ../Grammars`.
+The grammar comes from [Grammars](https://github.com/QuartzProject/Grammars): change it there and copy it here with
+`npm run sync-grammar -- <Grammars sources>`.
 
 ## License
 
