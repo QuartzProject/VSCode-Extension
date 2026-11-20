@@ -1,0 +1,117 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md']
+  pull_request:
+    paths-ignore: ['**.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Plan the version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = push ] && [ "$GITHUB_REF" = refs/heads/main ]; then
+              .github/scripts/plan-version.sh release
+          else
+              .github/scripts/plan-version.sh ci
+          fi
+
+  grammar:
+    name: Grammar copy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/checkout@v7
+        with:
+          repository: QuartzProject/Grammars
+          path: .deps/grammars
+
+      - name: Compare with Grammars
+        run: |
+          status=0
+          check() {
+              if ! cmp -s ".deps/grammars/textmate/$1" "$2"; then
+                  echo "::error file=$2::$2 differs from textmate/$1 in QuartzProject/Grammars; run npm run sync-grammar"
+                  status=1
+              fi
+          }
+          check quartz.tmLanguage.json syntaxes/quartz.tmLanguage.json
+          check language-configuration.json language-configuration.json
+          exit "$status"
+
+  package:
+    name: Package
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Stamp the version
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+        run: |
+          base="${VERSION%%-*}"
+          semver="$base.0"
+          [ "$base" = "$VERSION" ] || semver="$semver-${VERSION#*-}"
+          npm version --no-git-tag-version --allow-same-version "$semver"
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          npx --yes @vscode/vsce@3 package --out "dist/quartz-vscode-${{ needs.plan.outputs.version }}.vsix"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: quartz-vscode
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: [plan, grammar, package]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          pattern: quartz-vscode
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/publish-release.sh "${{ needs.plan.outputs.version }}" "$GITHUB_SHA" artifacts
