@@ -65,7 +65,7 @@
         "quartz.server.path": {
           "type": "string",
           "default": "quartz-lsp",
-          "description": "Path to the quartz-lsp executable. A bare name is looked up on PATH."
+          "description": "Path to the quartz-lsp executable. The default uses the one bundled with the extension, or quartz-lsp on PATH."
         },
         "quartz.server.enabled": {
           "type": "boolean",
@@ -75,7 +75,7 @@
         "quartz.cli.path": {
           "type": "string",
           "default": "quartz",
-          "description": "Path to the quartz executable, used to debug (`quartz debug --dap`). A bare name is looked up on PATH."
+          "description": "Path to the quartz executable, used to debug (`quartz debug --dap`). The default uses the one bundled with the extension, or quartz on PATH."
         }
       }
     },

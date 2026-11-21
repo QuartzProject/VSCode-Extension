@@ -1,16 +1,41 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
 const vscode = require('vscode');
 const { LanguageClient } = require('vscode-languageclient/node');
 
 let client;
+let extensionPath;
+
+// The default name means the copy in the extension's bin/ (the platform packages carry one), then the PATH.
+function tool(setting, name) {
+    const configured = vscode.workspace.getConfiguration('quartz').get(setting) || name;
+    if (configured !== name) {
+        return configured;
+    }
+    const bundled = path.join(extensionPath, 'bin', process.platform === 'win32' ? `${name}.exe` : name);
+    if (!fs.existsSync(bundled)) {
+        return name;
+    }
+    if (process.platform !== 'win32') {
+        try {
+            fs.accessSync(bundled, fs.constants.X_OK);
+        } catch {
+            try {
+                fs.chmodSync(bundled, 0o755);
+            } catch {}
+        }
+    }
+    return bundled;
+}
 
 async function start() {
     const config = vscode.workspace.getConfiguration('quartz');
     if (!config.get('server.enabled', true)) {
         return;
     }
-    const command = config.get('server.path') || 'quartz-lsp';
+    const command = tool('server.path', 'quartz-lsp');
     const serverOptions = { command, args: [] };
     const clientOptions = {
         documentSelector: [
@@ -43,8 +68,7 @@ async function restart() {
 // The debugger is the CLI itself: `quartz debug --dap` speaks the Debug Adapter Protocol on stdin and stdout.
 class QuartzDebugAdapterFactory {
     createDebugAdapterDescriptor() {
-        const command = vscode.workspace.getConfiguration('quartz').get('cli.path') || 'quartz';
-        return new vscode.DebugAdapterExecutable(command, ['debug', '--dap']);
+        return new vscode.DebugAdapterExecutable(tool('cli.path', 'quartz'), ['debug', '--dap']);
     }
 }
 
@@ -69,6 +93,7 @@ class QuartzDebugConfigurationProvider {
 }
 
 function activate(context) {
+    extensionPath = context.extensionPath;
     context.subscriptions.push(
         vscode.debug.registerDebugAdapterDescriptorFactory('quartz', new QuartzDebugAdapterFactory()),
         vscode.debug.registerDebugConfigurationProvider('quartz', new QuartzDebugConfigurationProvider()),

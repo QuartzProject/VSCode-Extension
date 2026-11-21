@@ -21,6 +21,7 @@ jobs:
     timeout-minutes: 10
     outputs:
       version: ${{ steps.version.outputs.version }}
+      quartz: ${{ steps.quartz.outputs.tag }}
     steps:
       - uses: actions/checkout@v7
 
@@ -35,6 +36,12 @@ jobs:
           else
               .github/scripts/plan-version.sh ci
           fi
+
+      - name: Pick the Quartz release
+        id: quartz
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "tag=$(gh release view --repo QuartzProject/Quartz --json tagName --jq .tagName)" >>"$GITHUB_OUTPUT"
 
   grammar:
     name: Grammar copy
@@ -62,10 +69,20 @@ jobs:
           exit "$status"
 
   package:
-    name: Package
+    name: Package (${{ matrix.vscode }})
     needs: plan
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { vscode: linux-x64, quartz: Linux-x64 }
+          - { vscode: linux-arm64, quartz: Linux-arm64 }
+          - { vscode: darwin-arm64, quartz: macOS-arm64 }
+          - { vscode: win32-x64, quartz: Windows-x64 }
+          - { vscode: win32-arm64, quartz: Windows-arm64 }
+          - { vscode: universal, quartz: '' }
     steps:
       - uses: actions/checkout@v7
 
@@ -85,14 +102,28 @@ jobs:
           [ "$base" = "$VERSION" ] || semver="$semver-${VERSION#*-}"
           npm version --no-git-tag-version --allow-same-version "$semver"
 
+      - name: Fetch quartz and quartz-lsp
+        if: ${{ matrix.quartz != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/fetch-quartz-tools.sh "${{ needs.plan.outputs.quartz }}" "${{ matrix.quartz }}" bin
+
       - name: Package
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          TARGET: ${{ matrix.vscode }}
         run: |
           mkdir -p dist
-          npx --yes @vscode/vsce@3 package --out "dist/quartz-vscode-${{ needs.plan.outputs.version }}.vsix"
+          if [ "$TARGET" = universal ]; then
+              npx --yes @vscode/vsce@3 package --out "dist/quartz-vscode-$VERSION.vsix"
+          else
+              npx --yes @vscode/vsce@3 package --target "$TARGET" --out "dist/quartz-vscode-$VERSION-$TARGET.vsix"
+          fi
+          unzip -l dist/*.vsix
 
       - uses: actions/upload-artifact@v7
         with:
-          name: quartz-vscode
+          name: quartz-vscode-${{ matrix.vscode }}
           path: dist/
           if-no-files-found: error
 
@@ -109,7 +140,7 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           path: artifacts
-          pattern: quartz-vscode
+          pattern: quartz-vscode-*
 
       - name: Publish the release
         env:
