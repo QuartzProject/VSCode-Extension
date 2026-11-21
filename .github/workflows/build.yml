@@ -79,6 +79,9 @@ jobs:
         include:
           - { vscode: linux-x64, quartz: Linux-x64 }
           - { vscode: linux-arm64, quartz: Linux-arm64 }
+          - { vscode: alpine-x64, quartz: Linux-musl-x64 }
+          - { vscode: alpine-arm64, quartz: Linux-musl-arm64 }
+          - { vscode: darwin-x64, quartz: macOS-x64 }
           - { vscode: darwin-arm64, quartz: macOS-arm64 }
           - { vscode: win32-x64, quartz: Windows-x64 }
           - { vscode: win32-arm64, quartz: Windows-arm64 }

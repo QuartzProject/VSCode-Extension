@@ -27,7 +27,8 @@
 
 Every commit to `main` publishes a release, numbered `0.<n>` until 1.0, on the
 [releases page](https://github.com/QuartzProject/VSCode-Extension/releases). Download the `.vsix` for your
-system (`Linux-x64`, `Linux-arm64`, `macOS-arm64`, `Windows-x64` or `Windows-arm64`) and pick
+system (`Linux-x64`, `Linux-arm64`, `Linux-musl-x64`, `Linux-musl-arm64`, `macOS-x64`, `macOS-arm64`, `Windows-x64`
+or `Windows-arm64`) and pick
 **Extensions: Install from VSIX...** in the command palette. It carries `quartz-lsp` and `quartz`, so nothing else
 needs installing.
 
