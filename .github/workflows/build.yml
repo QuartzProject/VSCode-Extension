@@ -69,7 +69,7 @@ jobs:
           exit "$status"
 
   package:
-    name: Package (${{ matrix.vscode }})
+    name: Package (${{ matrix.quartz || 'universal' }})
     needs: plan
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -112,12 +112,13 @@ jobs:
         env:
           VERSION: ${{ needs.plan.outputs.version }}
           TARGET: ${{ matrix.vscode }}
+          NAME: ${{ matrix.quartz }}
         run: |
           mkdir -p dist
           if [ "$TARGET" = universal ]; then
               npx --yes @vscode/vsce@3 package --out "dist/quartz-vscode-$VERSION.vsix"
           else
-              npx --yes @vscode/vsce@3 package --target "$TARGET" --out "dist/quartz-vscode-$VERSION-$TARGET.vsix"
+              npx --yes @vscode/vsce@3 package --target "$TARGET" --out "dist/quartz-vscode-$VERSION-$NAME.vsix"
           fi
           unzip -l dist/*.vsix
 
